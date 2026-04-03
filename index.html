@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>PresentationApp — About Me</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+/* ─── RESET & ROOT ─────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-deep:    #0a0c10;
+  --bg-card:    #10141c;
+  --bg-hover:   #161c28;
+  --bg-active:  #1c2438;
+  --border:     #2a3248;
+  --border-glow:#3d5099;
+  --accent:     #4f80ff;
+  --accent2:    #7c5cfc;
+  --accent3:    #00d4aa;
+  --text-1:     #e8ecf4;
+  --text-2:     #8a95b0;
+  --text-3:     #545f7a;
+  --gold:       #f0b429;
+  --red:        #ff4f6a;
+  --sidebar-w:  270px;
+  --topbar-h:   64px;
+  --radius:     12px;
+  --radius-sm:  8px;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Raleway', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-1);
+  overflow: hidden;
+}
+
+/* ─── LAYOUT ─────────────────────────────────── */
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+/* TOP BAR */
+.topbar {
+  height: var(--topbar-h);
+  background: rgba(10,12,16,0.98);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
+}
+.topbar-logo {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+}
+.topbar-logo span { font-weight: 400; opacity: 0.7; }
+.topbar-sep { flex: 1; }
+.topbar-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,128,255,0.07); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(79,128,255,0.35);
+}
+.btn-primary:hover { box-shadow: 0 4px 30px rgba(79,128,255,0.55); transform: translateY(-1px); }
+.btn-success {
+  background: linear-gradient(135deg, var(--accent3), #00a896);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(0,212,170,0.3);
+}
+.btn-success:hover { box-shadow: 0 4px 30px rgba(0,212,170,0.5); transform: translateY(-1px); }
+.btn svg { flex-shrink: 0; }
+
+/* BODY AREA */
+.body-area { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+/* SIDEBAR */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.sidebar-header {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  font-weight: 600;
+}
+.slide-nav { overflow-y: auto; flex: 1; padding: 8px; }
+.slide-nav::-webkit-scrollbar { width: 4px; }
+.slide-nav::-webkit-scrollbar-track { background: transparent; }
+.slide-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.slide-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.18s;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+}
+.slide-item:hover { background: var(--bg-hover); border-color: var(--border); }
+.slide-item.active { background: var(--bg-active); border-color: var(--border-glow); box-shadow: 0 0 0 1px rgba(79,128,255,0.15); }
+.slide-num {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700; color: var(--text-3);
+  flex-shrink: 0;
+  font-family: 'Cinzel', serif;
+}
+.slide-item.active .slide-num { background: linear-gradient(135deg, var(--accent), var(--accent2)); border-color: transparent; color: #fff; }
+.slide-info { min-width: 0; }
+.slide-name { font-size: 0.82rem; font-weight: 600; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slide-desc { font-size: 0.7rem; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.slide-item.active .slide-name { color: var(--accent); }
+.slide-item.done .slide-num { background: rgba(0,212,170,0.15); border-color: var(--accent3); color: var(--accent3); }
+.slide-item.done .slide-num::after { content: '✓'; font-family: sans-serif; font-size: 0.8rem; }
+
+/* MAIN AREA */
+.main-area { flex: 1; overflow-y: auto; padding: 28px 36px; background: var(--bg-deep); }
+.main-area::-webkit-scrollbar { width: 6px; }
+.main-area::-webkit-scrollbar-track { background: transparent; }
+.main-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* SLIDE EDITOR PANEL */
+.slide-panel { display: none; animation: fadeInUp 0.3s ease; }
+.slide-panel.active { display: block; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+.panel-header { margin-bottom: 24px; }
+.panel-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px;
+  background: rgba(79,128,255,0.12); border: 1px solid rgba(79,128,255,0.25);
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 10px;
+}
+.panel-title { font-family: 'Cinzel', serif; font-size: 1.6rem; font-weight: 600; color: var(--text-1); letter-spacing: 0.03em; }
+.panel-subtitle { font-size: 0.83rem; color: var(--text-3); margin-top: 6px; line-height: 1.6; }
+
+/* FORM */
+.form-grid { display: grid; gap: 18px; }
+.form-grid-2 { grid-template-columns: 1fr 1fr; gap: 18px; }
+
+.form-group { display: flex; flex-direction: column; gap: 7px; }
+.form-label { font-size: 0.78rem; font-weight: 600; color: var(--text-2); letter-spacing: 0.05em; text-transform: uppercase; }
+.form-label .optional { font-weight: 400; color: var(--text-3); text-transform: none; letter-spacing: 0; font-size: 0.72rem; }
+.form-input, .form-textarea {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 11px 14px; color: var(--text-1); font-family: 'Raleway', sans-serif;
+  font-size: 0.9rem; transition: all 0.2s; outline: none; width: 100%;
+}
+.form-input:focus, .form-textarea:focus {
+  border-color: var(--accent); background: rgba(79,128,255,0.06); box-shadow: 0 0 0 3px rgba(79,128,255,0.1);
+}
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text-3); }
+.form-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+/* IMAGE UPLOAD */
+.img-upload-zone {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.2s;
+  position: relative; overflow: hidden; background: var(--bg-card);
+}
+.img-upload-zone:hover { border-color: var(--accent); background: rgba(79,128,255,0.05); }
+.img-upload-zone.has-img { padding: 0; border-style: solid; border-color: var(--border-glow); }
+.img-upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.upload-icon { font-size: 2rem; margin-bottom: 8px; }
+.upload-text { font-size: 0.83rem; color: var(--text-2); font-weight: 500; }
+.upload-sub { font-size: 0.73rem; color: var(--text-3); margin-top: 4px; }
+.img-preview { width: 100%; max-height: 200px; object-fit: cover; border-radius: calc(var(--radius) - 2px); display: block; }
+.img-remove {
+  position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7);
+  border: 1px solid var(--border); color: var(--text-1); border-radius: 6px;
+  padding: 4px 8px; font-size: 0.72rem; cursor: pointer; transition: all 0.2s; z-index: 5;
+}
+.img-remove:hover { background: var(--red); border-color: var(--red); }
+
+/* TAGS */
+.tag-container {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 8px; min-height: 52px; display: flex; flex-wrap: wrap; gap: 6px; cursor: text; transition: all 0.2s;
+}
+.tag-container:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,128,255,0.1); }
+.tag {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px;
+  background: rgba(79,128,255,0.15); border: 1px solid rgba(79,128,255,0.3); color: var(--accent);
+  font-size: 0.8rem; font-weight: 600;
+}
+.tag-del { background: none; border: none; cursor: pointer; color: var(--accent); font-size: 1rem; line-height: 1; padding: 0; opacity: 0.6; transition: opacity 0.15s; }
+.tag-del:hover { opacity: 1; }
+.tag-input { border: none; outline: none; background: transparent; color: var(--text-1); font-family: 'Raleway', sans-serif; font-size: 0.88rem; flex: 1; min-width: 100px; padding: 4px 6px; }
+.tag-input::placeholder { color: var(--text-3); }
+
+/* SECTION DIVIDER */
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+.section-label {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text-3); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* NAV BUTTONS */
+.panel-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); gap: 12px; flex-wrap: wrap;
+}
+.nav-step { font-size: 0.78rem; color: var(--text-3); flex-shrink: 0; }
+
+/* PROGRESS BAR */
+.progress-bar-wrap { padding: 14px 18px; border-top: 1px solid var(--border); background: var(--bg-card); }
+.progress-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-3); margin-bottom: 6px; }
+.progress-track { height: 4px; background: var(--bg-deep); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+
+/* ─── PREVIEW MODAL ─────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(6px);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  width: 100%; max-width: 900px; max-height: 92vh; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: 16px; display: flex; flex-direction: column;
+  overflow: hidden; transform: scale(0.95); transition: transform 0.3s; box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+}
+.modal-overlay.open .modal { transform: scale(1); }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.modal-title { font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.05em; color: var(--text-1); }
+.modal-close {
+  background: var(--bg-deep); border: 1px solid var(--border); color: var(--text-2);
+  width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0;
+}
+.modal-close:hover { border-color: var(--red); color: var(--red); }
+.modal-body {
+  flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column;
+  align-items: center; gap: 14px; min-height: 0;
+}
+.modal-body::-webkit-scrollbar { width: 6px; }
+.modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.slide-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.slide-counter { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--text-2); min-width: 70px; text-align: center; }
+#preview-slide-wrap {
+  width: 100%; max-width: 800px; position: relative;
+  border-radius: 10px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid var(--border);
+}
+.modal-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-top: 1px solid var(--border); flex-shrink: 0; gap: 10px; flex-wrap: wrap;
+}
+.modal-dots { display: flex; gap: 5px; flex-wrap: wrap; max-width: 220px; }
+.modal-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); cursor: pointer; transition: all 0.2s; }
+.modal-dot.active { background: var(--accent); width: 18px; border-radius: 4px; }
+
+/* LOADING / TOAST */
+.toast {
+  position: fixed; bottom: 20px; right: 20px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px;
+  display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text-1);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 9999;
+  transform: translateY(80px); opacity: 0; transition: all 0.35s cubic-bezier(.4,0,.2,1); pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-icon { font-size: 1.1rem; }
+.gen-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9998;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(8px);
+}
+.gen-overlay.show { opacity: 1; pointer-events: all; }
+.gen-spinner { width: 48px; height: 48px; border: 3px solid rgba(79,128,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.gen-text { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--text-2); letter-spacing: 0.06em; }
+.gen-sub { font-size: 0.75rem; color: var(--text-3); text-align: center; padding: 0 20px; }
+.gen-progress { font-size: 0.8rem; color: var(--accent); font-family: 'Cinzel', serif; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ─── HAMBURGER ─────────────────────────── */
+.hamburger {
+  display: none; flex-direction: column; gap: 5px; background: transparent;
+  border: 1px solid var(--border); cursor: pointer; padding: 9px 10px;
+  border-radius: var(--radius-sm); flex-shrink: 0; transition: all 0.2s;
+}
+.hamburger:hover { border-color: var(--accent); background: rgba(79,128,255,0.07); }
+.hamburger span { display: block; width: 18px; height: 2px; background: var(--text-2); border-radius: 2px; }
+
+/* ─── SIDEBAR BACKDROP ─────────────────── */
+.sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 150; backdrop-filter: blur(3px); }
+.sidebar-backdrop.open { display: block; }
+
+/* ─── RENDERED SLIDE CANVAS STYLES ─────────────────────────────────────── */
+/* NOTE: These are used BOTH in preview modal and in PDF render container */
+.slide-render {
+  width: 800px; height: 450px; position: relative; overflow: hidden;
+  font-family: 'Raleway', sans-serif;
+}
+.slide-render.s1  { background: linear-gradient(135deg, #06080f 0%, #0e1628 50%, #0c1020 100%); }
+.slide-render.s2  { background: linear-gradient(135deg, #080b14 0%, #111929 100%); }
+.slide-render.s3  { background: linear-gradient(135deg, #070c12 0%, #0d1a1f 100%); }
+.slide-render.s4  { background: linear-gradient(135deg, #08090e 0%, #101624 100%); }
+.slide-render.s5  { background: linear-gradient(135deg, #06090f 0%, #101828 100%); }
+.slide-render.s6  { background: linear-gradient(135deg, #070911 0%, #0f1525 100%); }
+.slide-render.s7  { background: linear-gradient(135deg, #080910 0%, #14162a 100%); }
+.slide-render.s8  { background: linear-gradient(135deg, #060a10 0%, #0d1a22 100%); }
+.slide-render.s9  { background: linear-gradient(135deg, #060810 0%, #101428 100%); }
+.slide-render.s10 { background: linear-gradient(135deg, #07080f 0%, #0e1520 100%); }
+.slide-render.s11 { background: linear-gradient(135deg, #060810 0%, #0e1225 100%); }
+
+.grid-overlay {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+  background-size: 40px 40px; pointer-events: none;
+}
+.blob1 {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, var(--blob1-color, rgba(79,128,255,0.18)) 0%, transparent 70%);
+  width: var(--blob1-w, 400px); height: var(--blob1-h, 400px);
+  top: var(--blob1-top, -150px); right: var(--blob1-right, -100px);
+}
+.blob2 {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, var(--blob2-color, rgba(124,92,252,0.15)) 0%, transparent 70%);
+  width: var(--blob2-w, 300px); height: var(--blob2-h, 300px);
+  bottom: var(--blob2-bottom, -100px); left: var(--blob2-left, -80px);
+}
+.slide-top-accent {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(79,128,255,0.7), rgba(124,92,252,0.7), transparent);
+  z-index: 10;
+}
+
+.sr-inner { position: relative; z-index: 1; width: 100%; height: 100%; padding: 36px 46px; display: flex; flex-direction: column; }
+.sr-section-badge { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 10px; font-size: 8px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #00d4aa; }
+.sr-section-badge::before { content: '●'; font-size: 6px; }
+.sr-heading { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 600; color: #e8ecf4; margin-bottom: 12px; }
+.sr-body { font-size: 11px; color: #8a95b0; line-height: 1.8; }
+.sr-page-num { position: absolute; right: 16px; bottom: 10px; font-size: 8px; color: rgba(255,255,255,0.2); font-family: 'Cinzel', serif; letter-spacing: 0.08em; }
+
+/* S1 */
+.sr-s1-top { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 10px; }
+.sr-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; background: rgba(79,128,255,0.15); border: 1px solid rgba(79,128,255,0.3); font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #4f80ff; }
+.sr-main-title { font-family: 'Cinzel', serif; font-size: 42px; font-weight: 700; line-height: 1.1; background: linear-gradient(135deg,#e8ecf4,#8a95b0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 0.04em; }
+.sr-student-name { font-size: 16px; font-weight: 600; color: #4f80ff; letter-spacing: 0.05em; }
+.sr-meta { font-size: 11px; color: #545f7a; letter-spacing: 0.04em; }
+.sr-photo { position: absolute; right: 40px; bottom: 0; width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(79,128,255,0.4); box-shadow: 0 0 40px rgba(79,128,255,0.3); }
+.sr-photo-placeholder { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); width: 150px; height: 150px; border-radius: 50%; background: rgba(79,128,255,0.08); border: 2px dashed rgba(79,128,255,0.25); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; color: #545f7a; gap: 6px; }
+.sr-divider { width: 60px; height: 3px; background: linear-gradient(90deg,#4f80ff,#7c5cfc); border-radius: 2px; }
+
+/* S2 */
+.sr-intro-layout { display: flex; gap: 28px; align-items: flex-start; flex: 1; }
+.sr-intro-left { flex: 1; }
+.sr-info-box { background: rgba(79,128,255,0.08); border: 1px solid rgba(79,128,255,0.18); border-radius: 10px; padding: 12px; margin-top: 12px; }
+.sr-info-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+.sr-info-row:last-child { margin-bottom: 0; }
+.sr-info-key { font-size: 9px; font-weight: 700; color: #4f80ff; min-width: 55px; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 1px; }
+.sr-info-val { font-size: 10px; color: #c0c8de; }
+.sr-unique-box { background: rgba(240,180,41,0.08); border: 1px solid rgba(240,180,41,0.2); border-radius: 10px; padding: 12px; margin-top: 12px; }
+.sr-unique-label { font-size: 9px; font-weight: 700; color: #f0b429; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+.sr-unique-text { font-size: 11px; color: #c0c8de; line-height: 1.7; }
+
+/* S3 */
+.sr-family-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; flex: 1; }
+.sr-family-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 12px; }
+.sr-family-card-title { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #f0b429; margin-bottom: 7px; }
+.sr-family-card-body { font-size: 10px; color: #8a95b0; line-height: 1.75; }
+.sr-family-photo { width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.07); }
+
+/* S4 */
+.sr-edu-layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; flex: 1; margin-top: 12px; }
+.sr-edu-main { display: flex; flex-direction: column; gap: 12px; }
+.sr-badge { display: flex; align-items: center; gap: 10px; background: rgba(0,212,170,0.07); border: 1px solid rgba(0,212,170,0.15); border-radius: 8px; padding: 9px 12px; }
+.sr-badge-icon { font-size: 10px; font-weight: 800; color: #00d4aa; background: rgba(0,212,170,0.12); width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sr-badge-content { flex: 1; }
+.sr-badge-title { font-size: 9px; font-weight: 700; color: #00d4aa; text-transform: uppercase; letter-spacing: 0.07em; }
+.sr-badge-text { font-size: 10px; color: #c0c8de; margin-top: 2px; }
+.sr-awards { background: rgba(240,180,41,0.07); border: 1px solid rgba(240,180,41,0.18); border-radius: 10px; padding: 12px; }
+.sr-award-title { font-size: 9px; font-weight: 700; color: #f0b429; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 9px; }
+.sr-award-item { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 6px; font-size: 10px; color: #c0c8de; }
+.sr-award-item::before { content: '▸'; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+
+/* S5 */
+.sr-hobbies-wrap { flex: 1; margin-top: 12px; }
+.sr-hobby-chips { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 12px; }
+.sr-hobby-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; border-radius: 20px; background: rgba(124,92,252,0.12); border: 1px solid rgba(124,92,252,0.25); font-size: 10px; font-weight: 600; color: #a07cff; letter-spacing: 0.03em; }
+.sr-hobby-img { width: 100%; height: 75px; object-fit: cover; border-radius: 8px; margin-top: 12px; border: 1px solid rgba(255,255,255,0.06); }
+
+/* S6 */
+.sr-skills-layout { flex: 1; margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.sr-skill-bar { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 11px 14px; }
+.sr-skill-bar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.sr-skill-name { font-size: 11px; font-weight: 600; color: #e8ecf4; }
+.sr-skill-dot { width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg,#4f80ff,#7c5cfc); }
+
+/* S7 */
+.sr-fav-layout { flex: 1; margin-top: 12px; display: flex; flex-direction: column; gap: 9px; }
+.sr-fav-card { display: flex; align-items: flex-start; gap: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 11px; }
+.sr-fav-icon { font-size: 22px; flex-shrink: 0; }
+.sr-fav-content { flex: 1; }
+.sr-fav-category { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #4f80ff; margin-bottom: 3px; }
+.sr-fav-name { font-size: 11px; font-weight: 600; color: #e8ecf4; margin-bottom: 3px; }
+.sr-fav-reason { font-size: 9px; color: #8a95b0; line-height: 1.6; }
+
+/* S8 */
+.sr-goals-layout { flex: 1; margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.sr-goal-section { border-radius: 12px; padding: 14px; }
+.sr-goal-section.short { background: rgba(79,128,255,0.07); border: 1px solid rgba(79,128,255,0.18); }
+.sr-goal-section.long  { background: rgba(0,212,170,0.07); border: 1px solid rgba(0,212,170,0.18); }
+.sr-goal-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.sr-goal-icon { font-size: 10px; font-weight: 800; width: 24px; height: 24px; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sr-goal-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+.sr-goal-section.short .sr-goal-label { color: #4f80ff; }
+.sr-goal-section.long  .sr-goal-label { color: #00d4aa; }
+.sr-goal-list { list-style: none; }
+.sr-goal-item { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 7px; font-size: 10px; color: #c0c8de; line-height: 1.5; }
+.sr-goal-item::before { content: '›'; font-size: 14px; font-weight: 700; flex-shrink: 0; margin-top: -1px; }
+.sr-goal-section.short .sr-goal-item::before { color: #4f80ff; }
+.sr-goal-section.long  .sr-goal-item::before { color: #00d4aa; }
+
+/* S9 */
+.sr-models-layout { flex: 1; margin-top: 12px; display: flex; flex-direction: column; gap: 9px; }
+.sr-model-card { display: flex; align-items: center; gap: 13px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 11px 13px; }
+.sr-model-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg,rgba(79,128,255,0.25),rgba(124,92,252,0.25)); border: 2px solid rgba(79,128,255,0.35); display: flex; align-items: center; justify-content: center; font-size: 13px; font-family: 'Cinzel', serif; font-weight: 700; color: #4f80ff; flex-shrink: 0; }
+.sr-model-name { font-size: 12px; font-weight: 600; color: #e8ecf4; margin-bottom: 2px; }
+.sr-model-why { font-size: 10px; color: #8a95b0; line-height: 1.55; }
+
+/* S10 */
+.sr-places-layout { flex: 1; margin-top: 12px; display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+.sr-place-card { border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.07); }
+.sr-place-img { width: 100%; height: 65px; object-fit: cover; }
+.sr-place-no-img { width: 100%; height: 65px; background: linear-gradient(135deg,rgba(79,128,255,0.12),rgba(124,92,252,0.12)); display: flex; align-items: center; justify-content: center; font-size: 13px; font-family: 'Cinzel', serif; font-weight: 700; color: rgba(79,128,255,0.6); }
+.sr-place-info { padding: 7px 9px; background: rgba(10,12,16,0.8); }
+.sr-place-name { font-size: 10px; font-weight: 600; color: #e8ecf4; }
+.sr-place-desc { font-size: 9px; color: #545f7a; margin-top: 2px; line-height: 1.4; }
+
+/* S11 */
+.sr-thankyou { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+.sr-ty-title { font-family: 'Cinzel', serif; font-size: 28px; font-weight: 700; color: #e8ecf4; margin-bottom: 6px; letter-spacing: 0.05em; }
+.sr-ty-msg { font-size: 13px; color: #8a95b0; line-height: 1.7; max-width: 480px; margin: 0 auto; }
+.sr-ty-closing { margin-top: 18px; font-family: 'Cinzel', serif; font-size: 15px; background: linear-gradient(135deg,#4f80ff,#7c5cfc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-style: italic; }
+.sr-ty-divider { width: 60px; height: 3px; background: linear-gradient(90deg,#4f80ff,#7c5cfc); border-radius: 2px; margin: 14px auto; }
+.sr-ty-name { font-size: 11px; color: #545f7a; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* ─── PDF RENDER CONTAINER ─────────────── */
+#pdf-render-container {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 800px;
+  height: 450px;
+  overflow: hidden;
+  visibility: hidden;
+  z-index: -1;
+}
+
+/* ─── RESPONSIVE ─────────────────────── */
+@media (max-width: 900px) {
+  :root { --sidebar-w: 240px; }
+  .main-area { padding: 22px 20px; }
+  .topbar-subtitle { display: none; }
+}
+
+@media (max-width: 768px) {
+  :root { --topbar-h: 56px; }
+  .topbar { padding: 0 14px; gap: 8px; height: 56px; }
+  .topbar-logo { font-size: 0.95rem; }
+  .topbar-subtitle { display: none; }
+  .hamburger { display: flex; }
+  .btn { padding: 8px 11px; font-size: 0.77rem; }
+  .btn-label-text { display: none; }
+  .sidebar {
+    position: fixed; top: 56px; left: 0; bottom: 0; z-index: 200;
+    width: 280px; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .main-area { padding: 18px 14px; width: 100%; }
+  .panel-title { font-size: 1.25rem; }
+  .form-grid-2 { grid-template-columns: 1fr; }
+  .modal { max-height: 95vh; border-radius: 14px 14px 0 0; }
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .panel-nav { flex-direction: column; align-items: stretch; gap: 10px; }
+  .panel-nav .nav-step { text-align: center; }
+  .panel-nav > div { display: flex; gap: 8px; }
+  .panel-nav > div .btn { flex: 1; justify-content: center; }
+  .modal-footer { flex-direction: column; gap: 10px; align-items: stretch; }
+  .modal-footer > div { justify-content: center; }
+  .modal-footer > div:last-child { display: flex; gap: 8px; }
+  .modal-footer > div:last-child .btn { flex: 1; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .topbar { padding: 0 10px; gap: 6px; }
+  .main-area { padding: 14px 11px; }
+  .panel-title { font-size: 1.05rem; }
+  .form-textarea { min-height: 80px; }
+  .btn { padding: 9px 10px; font-size: 0.75rem; }
+  .modal-header { padding: 12px 15px; }
+  .modal-body { padding: 14px; }
+  .modal-footer { padding: 10px 14px; }
+  .modal-dots { max-width: 160px; }
+  .toast { bottom: 12px; right: 12px; left: 12px; font-size: 0.8rem; }
+  .gen-sub { font-size: 0.7rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  <span id="toast-msg">Done!</span>
+</div>
+
+<!-- GEN OVERLAY -->
+<div class="gen-overlay" id="gen-overlay">
+  <div class="gen-spinner"></div>
+  <div class="gen-text">PDF তৈরি হচ্ছে...</div>
+  <div class="gen-sub">সকল স্লাইড রেন্ডার করা হচ্ছে, একটু অপেক্ষা করুন</div>
+  <div class="gen-progress" id="gen-progress-text"></div>
+</div>
+
+<!-- PDF RENDER CONTAINER (hidden, used for PDF generation) -->
+<div id="pdf-render-container"></div>
+
+<!-- PREVIEW MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Presentation Preview</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="preview-slide-label" style="font-size:0.78rem;color:var(--text-3);">Slide 1 / 11</span>
+        <button class="modal-close" onclick="closePreview()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div id="preview-slide-wrap"></div>
+      <div class="slide-controls">
+        <button class="btn btn-ghost" onclick="prevPreviewSlide()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          আগের
+        </button>
+        <span class="slide-counter" id="preview-counter">1 / 11</span>
+        <button class="btn btn-ghost" onclick="nextPreviewSlide()">
+          পরের
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-dots" id="modal-dots"></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost" onclick="closePreview()">বন্ধ করুন</button>
+        <button class="btn btn-success" onclick="downloadPDF()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          PDF ডাউনলোড
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
+    <div class="topbar-logo">Presentation<span>App</span></div>
+    <div class="topbar-sep"></div>
+    <div class="topbar-subtitle">About Me — Student Presentation</div>
+    <div class="topbar-sep"></div>
+    <button class="btn btn-ghost" onclick="openPreview()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span class="btn-label-text">প্রিভিউ</span>
+    </button>
+    <button class="btn btn-success" onclick="downloadPDF()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span class="btn-label-text">PDF ডাউনলোড</span>
+    </button>
+  </header>
+
+  <div class="body-area">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">স্লাইড তালিকা</div>
+      </div>
+      <div class="slide-nav" id="slide-nav"></div>
+      <div class="progress-bar-wrap">
+        <div class="progress-label">
+          <span>অগ্রগতি</span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="main-area" id="main-area"></main>
+  </div>
+</div>
+
+<script>
+// ─── DATA DEFINITION ───────────────────────────────────────────────────────
+const SLIDES = [
+  { id:1, key:'s1', name:'Title Slide', desc:'About Me', fields:[
+    {id:'s1_title',   label:'উপস্থাপনার শিরোনাম', type:'input',    placeholder:'About Me', required:true},
+    {id:'s1_name',    label:'শিক্ষার্থীর পূর্ণ নাম', type:'input',    placeholder:'তোমার সম্পূর্ণ নাম লেখো', required:true},
+    {id:'s1_class',   label:'শ্রেণী / ক্লাস',         type:'input',    placeholder:'যেমন: Class 9, Grade 10'},
+    {id:'s1_tagline', label:'একটি ট্যাগলাইন',          type:'input',    placeholder:'যেমন: Dreamer. Creator. Learner.'},
+    {id:'s1_photo',   label:'নিজের ফটো',               type:'image',    placeholder:'প্রোফাইল ফটো আপলোড করো'},
+  ]},
+  { id:2, key:'s2', name:'Introduction', desc:'পরিচয়', fields:[
+    {id:'s2_name',     label:'নাম',                        type:'input',    placeholder:'তোমার নাম'},
+    {id:'s2_age',      label:'বয়স',                       type:'input',    placeholder:'বয়স'},
+    {id:'s2_intro',    label:'সংক্ষিপ্ত পরিচয়',           type:'textarea', placeholder:'নিজের সম্পর্কে কিছু লেখো...'},
+    {id:'s2_unique',   label:'তোমার বিশেষ একটি বৈশিষ্ট্য', type:'textarea', placeholder:'এমন একটি ব্যাপার যা তোমাকে আলাদা করে তোলে...'},
+    {id:'s2_hometown', label:'জন্মস্থান / বাড়ি',           type:'input',    placeholder:'শহর বা গ্রামের নাম'},
+  ]},
+  { id:3, key:'s3', name:'Family Background', desc:'পারিবারিক পরিচয়', fields:[
+    {id:'s3_father',      label:'বাবার নাম ও পেশা',           type:'input',    placeholder:'নাম — পেশা'},
+    {id:'s3_mother',      label:'মায়ের নাম ও পেশা',           type:'input',    placeholder:'নাম — পেশা'},
+    {id:'s3_siblings',    label:'ভাই/বোনের তথ্য',             type:'input',    placeholder:'যেমন: ১ বড় ভাই, ১ ছোট বোন'},
+    {id:'s3_family_desc', label:'পরিবার সম্পর্কে কিছু কথা',   type:'textarea', placeholder:'তোমার পরিবার কেমন?'},
+    {id:'s3_photo',       label:'পারিবারিক ছবি (ঐচ্ছিক)',      type:'image',    placeholder:'পারিবারিক ফটো আপলোড করো'},
+  ]},
+  { id:4, key:'s4', name:'Educational Background', desc:'শিক্ষাগত তথ্য', fields:[
+    {id:'s4_school',       label:'বিদ্যালয়ের নাম',                      type:'input',    placeholder:'স্কুলের পূর্ণ নাম'},
+    {id:'s4_class',        label:'বর্তমান শ্রেণী',                       type:'input',    placeholder:'যেমন: Class 10'},
+    {id:'s4_subjects',     label:'প্রিয় বিষয়সমূহ (Enter চাপো)',          type:'tags',     placeholder:'বিষয় লেখো...'},
+    {id:'s4_achievements', label:'অর্জন / পুরস্কার',                     type:'textarea', placeholder:'স্কুলে যেসব পুরস্কার বা সাফল্য পেয়েছ...'},
+    {id:'s4_gpa',          label:'ফলাফল / GPA (ঐচ্ছিক)',                  type:'input',    placeholder:'যেমন: GPA 5.00'},
+  ]},
+  { id:5, key:'s5', name:'Hobbies & Interests', desc:'শখ ও আগ্রহ', fields:[
+    {id:'s5_hobbies', label:'শখের তালিকা (Enter চাপো)', type:'tags',     placeholder:'একটি শখ লেখো...'},
+    {id:'s5_detail',  label:'শখ সম্পর্কে বিস্তারিত',    type:'textarea', placeholder:'তোমার পছন্দের শখ নিয়ে একটু বলো...'},
+    {id:'s5_img',     label:'শখের ছবি (ঐচ্ছিক)',        type:'image',    placeholder:'শখ-সম্পর্কিত ছবি আপলোড করো'},
+  ]},
+  { id:6, key:'s6', name:'Skills & Talents', desc:'দক্ষতা ও প্রতিভা', fields:[
+    {id:'s6_skills',   label:'দক্ষতার তালিকা (Enter চাপো)', type:'tags',     placeholder:'একটি দক্ষতা লেখো...'},
+    {id:'s6_detail',   label:'দক্ষতা সম্পর্কে বিস্তারিত',    type:'textarea', placeholder:'তুমি কীভাবে এই দক্ষতা অর্জন করেছ?'},
+    {id:'s6_projects', label:'প্রজেক্ট / উদাহরণ',             type:'textarea', placeholder:'তোমার যেসব কাজ বা প্রজেক্ট আছে...'},
+  ]},
+  { id:7, key:'s7', name:'Favorites', desc:'প্রিয় বই, সিনেমা, শো', fields:[
+    {id:'s7_books',  label:'প্রিয় বই ও কারণ',       type:'textarea', placeholder:'বইয়ের নাম — কেন ভালো লাগে?'},
+    {id:'s7_movies', label:'প্রিয় সিনেমা ও কারণ',  type:'textarea', placeholder:'সিনেমার নাম — কেন ভালো লাগে?'},
+    {id:'s7_shows',  label:'প্রিয় শো / সিরিজ',      type:'textarea', placeholder:'শোর নাম — কেন ভালো লাগে?'},
+    {id:'s7_quote',  label:'পছন্দের উক্তি (ঐচ্ছিক)', type:'input',    placeholder:'"তোমার পছন্দের কোনো বিখ্যাত উক্তি"'},
+  ]},
+  { id:8, key:'s8', name:'Goals & Aspirations', desc:'লক্ষ্য ও স্বপ্ন', fields:[
+    {id:'s8_short1', label:'স্বল্পমেয়াদী লক্ষ্য ১', type:'input',    placeholder:'যেমন: পরীক্ষায় A+ পাওয়া'},
+    {id:'s8_short2', label:'স্বল্পমেয়াদী লক্ষ্য ২', type:'input',    placeholder:'যেমন: বিজ্ঞান অলিম্পিয়াডে অংশগ্রহণ'},
+    {id:'s8_short3', label:'স্বল্পমেয়াদী লক্ষ্য ৩', type:'input',    placeholder:'আরেকটি লক্ষ্য...'},
+    {id:'s8_long1',  label:'দীর্ঘমেয়াদী স্বপ্ন ১',   type:'input',    placeholder:'যেমন: একজন ডাক্তার হতে চাই'},
+    {id:'s8_long2',  label:'দীর্ঘমেয়াদী স্বপ্ন ২',   type:'input',    placeholder:'আরেকটি বড় স্বপ্ন...'},
+    {id:'s8_why',    label:'কেন এই স্বপ্ন?',           type:'textarea', placeholder:'তোমার স্বপ্নের পেছনের অনুপ্রেরণা কী?'},
+  ]},
+  { id:9, key:'s9', name:'Role Models', desc:'অনুপ্রেরণার মানুষ', fields:[
+    {id:'s9_model1', label:'অনুপ্রেরণাদায়ী ব্যক্তি ১',         type:'input',    placeholder:'নাম'},
+    {id:'s9_why1',   label:'কেন তিনি অনুপ্রেরণা?',               type:'textarea', placeholder:'তার কোন বিষয়টি তোমাকে অনুপ্রাণিত করে?'},
+    {id:'s9_model2', label:'অনুপ্রেরণাদায়ী ব্যক্তি ২',         type:'input',    placeholder:'নাম'},
+    {id:'s9_why2',   label:'কেন তিনি অনুপ্রেরণা?',               type:'textarea', placeholder:'তার বিশেষ গুণ কী?'},
+    {id:'s9_model3', label:'অনুপ্রেরণাদায়ী ব্যক্তি ৩ (ঐচ্ছিক)', type:'input',    placeholder:'নাম'},
+  ]},
+  { id:10, key:'s10', name:'Favorite Places', desc:'প্রিয় স্থান', fields:[
+    {id:'s10_place1', label:'প্রিয় স্থান ১',        type:'input', placeholder:'স্থানের নাম'},
+    {id:'s10_desc1',  label:'কেন ভালো লাগে?',        type:'input', placeholder:'সংক্ষেপে বলো...'},
+    {id:'s10_img1',   label:'ছবি (ঐচ্ছিক)',          type:'image', placeholder:'স্থানের ছবি আপলোড করো'},
+    {id:'s10_place2', label:'প্রিয় স্থান ২',        type:'input', placeholder:'স্থানের নাম'},
+    {id:'s10_desc2',  label:'কেন ভালো লাগে?',        type:'input', placeholder:'সংক্ষেপে বলো...'},
+    {id:'s10_dream',  label:'স্বপ্নের গন্তব্য',      type:'input', placeholder:'যে জায়গায় যেতে চাও'},
+  ]},
+  { id:11, key:'s11', name:'Thank You', desc:'ধন্যবাদ', fields:[
+    {id:'s11_thanks',  label:'ধন্যবাদ বার্তা',                     type:'textarea', placeholder:'দর্শকদের প্রতি কৃতজ্ঞতা জানাও...'},
+    {id:'s11_closing', label:'ক্লোজিং মেসেজ',                      type:'input',    placeholder:'যেমন: This is just the beginning!'},
+    {id:'s11_name',    label:'তোমার নাম (স্বাক্ষরের মতো)',          type:'input',    placeholder:'তোমার নাম'},
+  ]},
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let currentSlide = 1;
+let formData = {};
+let imagePreviews = {};
+let previewSlide = 1;
+let tagData = {};
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  buildSidebar();
+  buildForms();
+  showSlide(1);
+  updateProgress();
+});
+
+// ─── SIDEBAR ────────────────────────────────────────────────────────────────
+function buildSidebar() {
+  const nav = document.getElementById('slide-nav');
+  nav.innerHTML = SLIDES.map(s => `
+    <div class="slide-item" id="nav-${s.id}" onclick="showSlide(${s.id})">
+      <div class="slide-num" id="num-${s.id}">${s.id}</div>
+      <div class="slide-info">
+        <div class="slide-name">${s.name}</div>
+        <div class="slide-desc">${s.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── FORM BUILD ─────────────────────────────────────────────────────────────
+function buildForms() {
+  const main = document.getElementById('main-area');
+  main.innerHTML = SLIDES.map(s => `
+    <div class="slide-panel" id="panel-${s.id}">
+      <div class="panel-header">
+        <div class="panel-tag">Slide ${s.id} / 11</div>
+        <div class="panel-title">${s.name}</div>
+        <div class="panel-subtitle">${s.desc} — এই স্লাইডের তথ্য নিচে পূরণ করো।</div>
+      </div>
+      <div class="form-grid">
+        ${s.fields.map(f => buildField(f)).join('')}
+      </div>
+      <div class="panel-nav">
+        <span class="nav-step">Slide ${s.id} of 11</span>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          ${s.id > 1  ? `<button class="btn btn-ghost" onclick="showSlide(${s.id-1})">← আগের স্লাইড</button>` : ''}
+          ${s.id < 11 ? `<button class="btn btn-primary" onclick="showSlide(${s.id+1})">পরের স্লাইড →</button>` : `<button class="btn btn-success" onclick="openPreview()">প্রিভিউ দেখো →</button>`}
+        </div>
+      </div>
+    </div>`).join('');
+
+  SLIDES.forEach(s => {
+    s.fields.forEach(f => {
+      if(f.type === 'image') return;
+      if(f.type === 'tags') { initTagInput(f.id); return; }
+      const el = document.getElementById(f.id);
+      if(el) el.addEventListener('input', () => { formData[f.id] = el.value; updateProgress(); });
+    });
+  });
+}
+
+function buildField(f) {
+  if(f.type === 'input') return `
+    <div class="form-group">
+      <label class="form-label">${f.label}${!f.required?'<span class="optional"> (ঐচ্ছিক)</span>':''}</label>
+      <input id="${f.id}" class="form-input" type="text" placeholder="${f.placeholder}" autocomplete="off"/>
+    </div>`;
+  if(f.type === 'textarea') return `
+    <div class="form-group">
+      <label class="form-label">${f.label}${!f.required?'<span class="optional"> (ঐচ্ছিক)</span>':''}</label>
+      <textarea id="${f.id}" class="form-textarea" placeholder="${f.placeholder}"></textarea>
+    </div>`;
+  if(f.type === 'tags') return `
+    <div class="form-group">
+      <label class="form-label">${f.label}</label>
+      <div class="tag-container" id="tc-${f.id}" onclick="document.getElementById('ti-${f.id}').focus()">
+        <input class="tag-input" id="ti-${f.id}" placeholder="${f.placeholder}" autocomplete="off"/>
+      </div>
+    </div>`;
+  if(f.type === 'image') return `
+    <div class="form-group">
+      <label class="form-label">${f.label}</label>
+      <div class="img-upload-zone" id="zone-${f.id}">
+        <input type="file" accept="image/*" onchange="handleImage(event,'${f.id}')"/>
+        <div id="zone-inner-${f.id}">
+          <div class="upload-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:#545f7a"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+          <div class="upload-text">ছবি বেছে নাও</div>
+          <div class="upload-sub">PNG, JPG, WEBP সাপোর্টেড</div>
+        </div>
+      </div>
+    </div>`;
+  return '';
+}
+
+function initTagInput(id) {
+  tagData[id] = [];
+  const input = document.getElementById('ti-'+id);
+  if(!input) return;
+  input.addEventListener('keydown', e => {
+    if((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+      e.preventDefault();
+      addTag(id, input.value.trim());
+      input.value = '';
+    }
+    if(e.key === 'Backspace' && !input.value && tagData[id].length) {
+      removeTag(id, tagData[id].length - 1);
+    }
+  });
+}
+
+function addTag(id, val) {
+  if(!val || tagData[id].includes(val)) return;
+  tagData[id].push(val);
+  renderTags(id);
+  updateProgress();
+}
+function removeTag(id, idx) {
+  tagData[id].splice(idx, 1);
+  renderTags(id);
+}
+function renderTags(id) {
+  const container = document.getElementById('tc-'+id);
+  const input = document.getElementById('ti-'+id);
+  if(!container || !input) return;
+  container.querySelectorAll('.tag').forEach(t => t.remove());
+  tagData[id].forEach((t, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'tag';
+    chip.innerHTML = `${escH(t)}<button class="tag-del" onclick="removeTag('${id}',${i})">×</button>`;
+    container.insertBefore(chip, input);
+  });
+}
+
+function handleImage(e, id) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    imagePreviews[id] = ev.target.result;
+    const zone = document.getElementById('zone-'+id);
+    const inner = document.getElementById('zone-inner-'+id);
+    zone.classList.add('has-img');
+    inner.innerHTML = `<img class="img-preview" src="${ev.target.result}" alt="preview"/><button class="img-remove" onclick="removeImage('${id}')">✕ হটাও</button>`;
+    updateProgress();
+  };
+  reader.readAsDataURL(file);
+}
+function removeImage(id) {
+  delete imagePreviews[id];
+  const zone = document.getElementById('zone-'+id);
+  const inner = document.getElementById('zone-inner-'+id);
+  zone.classList.remove('has-img');
+  inner.innerHTML = `<div class="upload-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:#545f7a"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="upload-text">ছবি বেছে নাও</div><div class="upload-sub">PNG, JPG, WEBP সাপোর্টেড</div>`;
+}
+
+// ─── SLIDE NAVIGATION ───────────────────────────────────────────────────────
+function showSlide(n) {
+  document.querySelectorAll('.slide-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.slide-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('panel-'+n).classList.add('active');
+  document.getElementById('nav-'+n).classList.add('active');
+  currentSlide = n;
+  document.getElementById('main-area').scrollTop = 0;
+  markDone();
+  if(window.innerWidth <= 768) closeSidebar();
+}
+
+function markDone() {
+  SLIDES.forEach(s => {
+    const nav = document.getElementById('nav-'+s.id);
+    const hasData = s.fields.some(f => {
+      if(f.type === 'tags') return tagData[f.id]?.length > 0;
+      if(f.type === 'image') return !!imagePreviews[f.id];
+      return !!formData[f.id];
+    });
+    if(hasData && s.id !== currentSlide) nav.classList.add('done');
+    else if(s.id !== currentSlide) nav.classList.remove('done');
+  });
+}
+
+function updateProgress() {
+  let filled = 0;
+  SLIDES.forEach(s => {
+    const ok = s.fields.some(f => {
+      if(f.type === 'tags') return tagData[f.id]?.length > 0;
+      if(f.type === 'image') return !!imagePreviews[f.id];
+      return !!formData[f.id];
+    });
+    if(ok) filled++;
+  });
+  const pct = Math.round((filled / SLIDES.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+}
+
+// ─── GET FIELD VALUE ────────────────────────────────────────────────────────
+function get(id) {
+  const el = document.getElementById(id);
+  return el ? (el.value || '') : (formData[id] || '');
+}
+function getTags(id) { return tagData[id] || []; }
+function getImg(id)  { return imagePreviews[id] || null; }
+
+function escH(str) {
+  if(!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── SLIDE RENDERER ─────────────────────────────────────────────────────────
+function renderSlide(n) {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = buildSlideHTML(n);
+  return wrap.firstElementChild;
+}
+
+function buildSlideHTML(n) {
+  switch(n) {
+    case 1:  return slide1();
+    case 2:  return slide2();
+    case 3:  return slide3();
+    case 4:  return slide4();
+    case 5:  return slide5();
+    case 6:  return slide6();
+    case 7:  return slide7();
+    case 8:  return slide8();
+    case 9:  return slide9();
+    case 10: return slide10();
+    case 11: return slide11();
+    default: return '<div class="slide-render"></div>';
+  }
+}
+
+// ─── SLIDE TEMPLATES ────────────────────────────────────────────────────────
+function slide1() {
+  const title   = get('s1_title')   || 'About Me';
+  const name    = get('s1_name')    || 'তোমার নাম';
+  const cls     = get('s1_class')   || '';
+  const tagline = get('s1_tagline') || 'Dreamer. Creator. Learner.';
+  const photo   = getImg('s1_photo');
+  const photoEl = photo
+    ? `<img class="sr-photo" src="${photo}" alt="photo"/>`
+    : `<div class="sr-photo-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(79,128,255,0.4)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>ফটো</span></div>`;
+  return `
+<div class="slide-render s1" style="background:linear-gradient(135deg,#06080f 0%,#0e1628 50%,#0c1020 100%);">
+  <div class="grid-overlay"></div>
+  <div class="blob1" style="width:400px;height:400px;top:-150px;right:-100px;background:radial-gradient(circle,rgba(79,128,255,0.18) 0%,transparent 70%);"></div>
+  <div class="blob2" style="width:300px;height:300px;bottom:-100px;left:-80px;background:radial-gradient(circle,rgba(124,92,252,0.15) 0%,transparent 70%);"></div>
+  <div class="slide-top-accent"></div>
+  <div class="sr-inner">
+    <div class="sr-s1-top">
+      <div class="sr-chip">✦ Student Presentation</div>
+      <div class="sr-main-title" style="font-family:'Cinzel',serif;font-size:42px;font-weight:700;line-height:1.1;background:linear-gradient(135deg,#e8ecf4,#8a95b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:0.04em;">${escH(title)}</div>
+      <div class="sr-divider"></div>
+      <div class="sr-student-name">${escH(name)}</div>
+      ${cls ? `<div class="sr-meta">${escH(cls)}</div>` : ''}
+      <div class="sr-meta" style="color:#4f80ff;font-style:italic;margin-top:4px;">${escH(tagline)}</div>
+    </div>
+    ${photoEl}
+    <div style="position:absolute;left:46px;bottom:14px;font-size:9px;color:rgba(255,255,255,0.15);letter-spacing:0.08em;font-family:'Cinzel',serif;">PresentationApp</div>
+  </div>
+  <div class="sr-page-num">01</div>
+</div>`;
+}
+
+function slide2() {
+  const name     = get('s2_name')     || get('s1_name') || 'নাম';
+  const age      = get('s2_age')      || '';
+  const intro    = get('s2_intro')    || 'এখানে তোমার পরিচয় আসবে।';
+  const unique   = get('s2_unique')   || '';
+  const hometown = get('s2_hometown') || '';
+  return `
+<div class="slide-render s2" style="background:linear-gradient(135deg,#080b14 0%,#111929 100%);">
+  <div class="grid-overlay"></div>
+  <div class="blob1" style="width:350px;height:350px;top:-120px;right:-80px;background:radial-gradient(circle,rgba(0,212,170,0.12) 0%,transparent 70%);"></div>
+  <div class="slide-top-accent"></div>
+  <div class="sr-inner">
+    <div class="sr-section-badge">Introduction</div>
+    <div class="sr-heading">আমি কে?</div>
+    <div class="sr-intro-layout">
+      <div class="sr-intro-left">
+        <div class="sr-body">${escH(intro)}</div>
+        <div class="sr-info-box">
+          ${name     ? `<div class="sr-info-row"><div class="sr-info-key">নাম</div><div class="sr-info-val">${escH(name)}</div></div>`:''}
+          ${age      ? `<div class="sr-info-row"><div class="sr-info-key">বয়স</div><div class="sr-info-val">${escH(age)} বছর</div></div>`:''}
+          ${hometown ? `<div class="sr-info-row"><div class="sr-info-key">বাড়ি</div><div class="sr-info-val">${escH(hometown)}</div></div>`:''}
+        </div>
+        ${unique ? `<div class="sr-unique-box"><div class="sr-unique-label">✦ বিশেষ বৈশিষ্ট্য</div><div class="sr-unique-text">${escH(unique)}</div></div>`:''}
+      </div>
+    </div>
+  </div>
+  <div class="sr-page-num">02</div>
+</div>`;
+}
+
+function slide3() {
+  const father   = get('s3_father')      || '';
+  const mother   = get('s3_mother')      || '';
+  const siblings = get('s3_siblings')    || '';
+  const desc     = get('s3_family_desc') || '';
+  const photo    = getImg('s3_photo');
+  return `
+<div class="slide-render s3" style="background:linear-gradient(135deg,#070c12 0%,#0d1a1f 100%);">
+  <div class="grid-overlay"></div>
+  <div class="blob1" style="width:320px;height:320px;top:-100px;left:-60px;background:radial-gradient(circle,rgba(240,180,41,0.12) 0%,transparent 70%);"></div>
+  <div class="slide-top-accent"></div>
+  <div class="sr-inner">
+    <div class="sr-section-badge" style="color:#f0b429">Family Background</div>
+    <div class="sr-heading">আমার পরিবার</div>
+    <div class="sr-family-grid">
+      <div>
+        ${father   ? `<div class="sr-family-card"><div class="sr-family-card-title">বাবা</div><div class="sr-family-card-body">${escH(father)}</div></div>` : ''}
+        ${mother   ? `<div class="sr-family-card" style="margin-top:10px"><div class="sr-family-card-title">মা</div><div class="sr-family-card-body">${escH(mother)}</div></div>` : ''}
+        ${siblings ? `<div class="sr-family-card" style="margin-top:10px"><div class="sr-family-card-title">ভাই / বোন</div><div class="sr-family-card-body">${escH(siblings)}</div></div>` : ''}
+        ${(!father && !mother && !siblings) ? `<div class="sr-family-card"><div class="sr-family-card-body">পরিবারের সদস্যদের তথ্য লেখো।</div></div>` : ''}
+      </div>
+      <div>
+        ${desc  ? `<div class="sr-family-card" style="background:rgba(240,180,41,0.07);border:1px solid rgba(240,180,41,0.18)"><div class="sr-family-card-title">পরিবারের কথা</div><div class="sr-family-card-body">${escH(desc)}</div></div>` : ''}
+        ${photo ? `<img class="sr-family-photo" src="${photo}" alt="family"/>` : ''}
+      </div>
+    </div>
+  </div>
+  <div class="sr-page-num">03</div>
+</div>`;
+}
+
+function slide4() {
+  const school  = get('s4_school')       || '';
+  const cls     = get('s4_class')        || '';
+  const subs    = getTags('s4_subjects') || [];
+  const achieve = get('s4_achievements') || '';
+  const gpa     = get('s4_gpa')          || '';
+  const awards  = achieve.split('\n').filter(l=>l.trim()).slice(0,4);
+  return `
+<div class="slide-render s4" style="background:linear-gradient(135deg,#08090e 0%,#101624 100%);">
+  <div class="grid-overlay"></div>
+  <div class="blob1" style="width:380px;height:380px;bottom:-140px;right:-100px;background:radial-gradient(circle,rgba(79,128,255,0.15) 0%,transparent 70%);"></div>
+  <div class="slide-top-accent"></div>
+  <div class="sr-inner">
+    <div class="sr-section-badge" style="color:#4f80ff">Educational Background</div>
+    <div class="sr-heading">শিক্ষাজীবন</div>
+    <div class="sr-edu-layout">
+      <div class="sr-edu-main">
+        ${school ? `<div class="sr-badge"><div class="sr-badge-icon">S</div><div class="sr-badge-content"><div class="sr-badge-title">বিদ্যালয়</div><div class="sr-badge-text">${escH(school)}</div></div></div>` : ''}
+        ${cls    ? `<div class="sr-badge"><div class="sr-badge-icon">C</div><div class="sr-badge-content"><div class="sr-badge-title">শ্রেণী</div><div class="sr-badge-text">${escH(cls)}</div></div></div>` : ''}
+        ${gpa    ? `<div class="sr-badge"><div class="sr-badge-icon">G</div><div class="sr-badge-content"><div class="sr-badge-title">ফলাফল</div><div class="sr-badge-text">${escH(gpa)}</div></div></div>` : ''}
+        ${subs.length ? `<div style="margin-top:4px"><div style="font-size:9px;font-weight:700;color:#4f80ff;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px">প্রিয় বিষয়</div><div style="display:flex;flex-wrap:wrap;gap:5px">${subs.map(s=>`<span class="sr-hobby-chip">${escH(s)}</span>`).join('')}</div></div>` : ''}
+        ${(!school && !cls && !gpa) ? `<div class="sr-body">শিক্ষাপ্রতিষ্ঠান ও শ্রেণীর তথ্য এখানে আসবে।</div>` : ''}
+      </div>
+      <div>
+        ${awards.length ? `<div class="sr-awards"><div class="sr-award-title">অর্জন ও পুরস্কার</div>${awards.map(a=>`<div class="sr-award-item">${escH(a)}</div>`).join('')}</div>` : ''}
+      </div>
+    </div>
+  </div>
+  <div class="sr-page-num">04</div>
+</div>`;
+}
+
+function slide5() {
+  const hobbies = getTags('s5_hobbies') || [];
+  const detail  = get('s5_detail') || '';
+  const img     = getImg('s5_img');
+  return `
+<div class="slide-render s5" style="background:linear-gradient(135deg,#06090f 0%,#101828 100%);">
+  <div class="grid-overlay"></div>
+  <div class="blob1" style="width:300px;height:300px;top:-80px;right:-60px;background:radial-gradient(circle,rgba(124,92,252,0.15) 0%,transparent 70%);"></div>
+  <div class="slide-top-accent"></div>
+  <div class="sr-inner">
+    <div class="sr-section-badge" style="color:#7c5cfc">Hobbies & Interests</div>
+    <div class="sr-heading">আমার শখ</div>
+    <div class="sr-hobbies-wrap">
+      ${detail ? `<div class="sr-body" style="margin-bottom:9px">${escH(detail)}</div>` : ''}
+      ${hobbies.length ? `<div class="sr-hobby-chips">${hobbies.map(h=>`<div class="sr-hobby-chip">${escH(h)}</div>`).join('')}</div>` : '<div class="sr-body">শখের তালিকা এখানে দেখাবে।</div>'}
+      ${img ? `<img class="sr-hobby-img" src="${img}" alt="hobby"/>` : ''}
+    </div>
+  </div>
+  <div class="sr-page-num">05</div>
+</div>`;
+}
+
+function slide6() {
+  const skills   = getTags('s6_skills') || [];
+  const detail   = get('s6_detail')   || '';
+  const projects = get('s6_projects') || '';
+  return `
+<div class="slide-render s6" style="background:linear-gradient(135deg,#070911 0%,#0f1525 100%);">
+  <div class="grid-overlay"></div>
+  <div class="blob1" style="width:350px;height:350px;bottom:-120px;left:-80px;background:radial-gradient(circle,rgba(0,212,170,0.13) 0%,transparent 70%);"></div>
+  <div class="slide-top-accent"></div>
+  <div class="sr-inner">
+    <div class="sr-section-badge" style="color:#00d4aa">Skills & Talents</div>
+    <div class="sr-heading">আমার দক্ষতা</div>
+    <div class="sr-skills-layout">
+      ${skills.length ? skills.map(s=>`
+        <div class="sr-skill-bar">
+          <div class="sr-skill-bar-header">
+            <div class="sr-skill-name">${escH(s)}</div>
+            <div class="sr-skill-dot"></div>
+          </div>
+        </div>`).join('') : '<div class="sr-body">দক্ষতার তালিকা এখানে আসবে।</div>'}
+      ${detail   ? `<div style="font-size:10px;color:#8a95b0;line-height:1.7;margin-top:3px">${escH(detail)}</div>` : ''}
+      ${projects ? `<div class="sr-skill-bar" style="background:rgba(0,212,170,0.06);border:1px solid rgba(0,212,170,0.18)"><div class="sr-badge-title" style="font-size:9px;font-weight:700;color:#00d4aa;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px">প্রজেক্ট / উদাহরণ</div><div style="font-size:10px;color:#c0c8de;margin-top:2px">${escH(projects)}</div></div>` : ''}
+    </div>
+  </div>
+  <div class="sr-page-num">06</div>
+</div>`;
+}
+
+function slide7() {
+  const books  = get('s7_books')  || '';
+  const movies = get('s7_movies') || '';
+  const shows  = get('s7_shows')  || '';
+  const quote  = get('s7_quote')  || '';
+  const cards = [
+    books  ? {icon:'📚', cat:'প্রিয় বই',    text:books}  : null,
+    movies ? {icon:'🎬', cat:'প্রিয় সিনেমা', text:movies} : null,
+    shows  ? {icon:'📺', cat:'প্রিয় শো',    text:shows}  : null,
+  ].filter(Boolean).slice(0,3);
+  return `
+<div class="slide-render s7" style="background:linear-gradient(135deg,#080910 0%,#14162a 100%);">
+  <div class="grid-overlay"></div>
+  <div class="blob1" style="width:320px;height:320px;top:-100px;right:-70px;background:radial-gradient(circle,rgba(240,180,41,0.13) 0%,transparent 70%);"></div>
+  <div class="slide-top-accent"></div>
+  <div class="sr-inner">
+    <div class="sr-section-badge" style="color:#f0b429">Favorites</div>
+    <div class="sr-heading">আমার প্রিয় বিনোদন</div>
+    <div class="sr-fav-layout">
+      ${cards.length ? cards.map(c=>`
+        <div class="sr-fav-card">
+          <div class="sr-fav-icon">${c.icon}</div>
+          <div class="sr-fav-content">
+            <div class="sr-fav-category">${c.cat}</div>
+            <div class="sr-fav-reason">${escH(c.text.split('\n')[0].substring(0,120))}</div>
+          </div>
+        </div>`).join('') : '<div class="sr-body">প্রিয় বই, সিনেমা ও শো এর নাম লেখো।</div>'}
+      ${quote ? `<div style="margin-top:7px;padding:9px 13px;border-left:3px solid #f0b429;background:rgba(240,180,41,0.07);border-radius:0 8px 8px 0"><div style="font-size:10px;color:#f0b429;font-style:italic">"${escH(quote)}"</div></div>` : ''}
+    </div>
+  </div>
+  <div class="sr-page-num">07</div>
+</div>`;
+}
+
+function slide8() {
+  const s1 = get('s8_short1'), s2 = get('s8_short2'), s3 = get('s8_short3');
+  const l1 = get('s8_long1'),  l2 = get('s8_long2');
+  const why = get('s8_why') || '';
+  const shorts = [s1,s2,s3].filter(Boolean);
+  const longs  = [l1,l2].filter(Boolean);
+  return `
+<div class="slide-render s8" style="background:linear-gradient(135deg,#060a10 0%,#0d1a22 100%);">
+  <div class="grid-overlay"></div>
+  <div class="blob1" style="width:360px;height:360px;top:-120px;left:-80px;background:radial-gradient(circle,rgba(79,128,255,0.16) 0%,transparent 70%);"></div>
+  <div class="slide-top-accent"></div>
+  <div class="sr-inner">
+    <div class="sr-section-badge" style="color:#4f80ff">Goals & Aspirations</div>
+    <div class="sr-heading">আমার লক্ষ্য ও স্বপ্ন</div>
+    <div class="sr-goals-layout">
+      <div class="sr-goal-section short">
+        <div class="sr-goal-header">
+          <div class="sr-goal-icon" style="background:rgba(79,128,255,0.2);color:#4f80ff;">S</div>
+          <div class="sr-goal-label">স্বল্পমেয়াদী লক্ষ্য</div>
+        </div>
+        <ul class="sr-goal-list">
+          ${shorts.length ? shorts.map(g=>`<li class="sr-goal-item">${escH(g)}</li>`).join('') : '<li class="sr-goal-item">তোমার লক্ষ্য লেখো</li>'}
+        </ul>
+      </div>
+      <div class="sr-goal-section long">
+        <div class="sr-goal-header">
+          <div class="sr-goal-icon" style="background:rgba(0,212,170,0.2);color:#00d4aa;">L</div>
+          <div class="sr-goal-label">দীর্ঘমেয়াদী স্বপ্ন</div>
+        </div>
+        <ul class="sr-goal-list">
+          ${longs.length ? longs.map(g=>`<li class="sr-goal-item">${escH(g)}</li>`).join('') : '<li class="sr-goal-item">তোমার স্বপ্ন লেখো</li>'}
+        </ul>
+        ${why ? `<div style="margin-top:9px;font-size:9px;color:#8a95b0;line-height:1.6;border-top:1px solid rgba(0,212,170,0.15);padding-top:7px">${escH(why)}</div>` : ''}
+      </div>
+    </div>
+  </div>
+  <div class="sr-page-num">08</div>
+</div>`;
+}
+
+function slide9() {
+  const m1 = get('s9_model1'), w1 = get('s9_why1');
+  const m2 = get('s9_model2'), w2 = get('s9_why2');
+  const m3 = get('s9_model3');
+  const models = [[m1,w1],[m2,w2],[m3,'']].filter(([m])=>m);
+  return `
+<div class="slide-render s9" style="background:linear-gradient(135deg,#060810 0%,#101428 100%);">
+  <div class="grid-overlay"></div>
+  <div class="blob1" style="width:340px;height:340px;bottom:-110px;right:-90px;background:radial-gradient(circle,rgba(124,92,252,0.16) 0%,transparent 70%);"></div>
+  <div class="slide-top-accent"></div>
+  <div class="sr-inner">
+    <div class="sr-section-badge" style="color:#7c5cfc">Role Models</div>
+    <div class="sr-heading">আমার অনুপ্রেরণা</div>
+    <div class="sr-models-layout">
+      ${models.length ? models.map(([m,w],i)=>`
+        <div class="sr-model-card">
+          <div class="sr-model-avatar">${i+1}</div>
+          <div>
+            <div class="sr-model-name">${escH(m)}</div>
+            ${w ? `<div class="sr-model-why">${escH(w.split('\n')[0].substring(0,100))}</div>` : ''}
+          </div>
+        </div>`).join('') : '<div class="sr-body">অনুপ্রেরণার মানুষদের নাম লেখো।</div>'}
+    </div>
+  </div>
+  <div class="sr-page-num">09</div>
+</div>`;
+}
+
+function slide10() {
+  const p1 = get('s10_place1'), d1 = get('s10_desc1'), img1 = getImg('s10_img1');
+  const p2 = get('s10_place2'), d2 = get('s10_desc2');
+  const dream = get('s10_dream');
+  const places = [[p1,d1,img1],[p2,d2,null],[dream,'স্বপ্নের গন্তব্য',null]].filter(([p])=>p).slice(0,4);
+  return `
+<div class="slide-render s10" style="background:linear-gradient(135deg,#07080f 0%,#0e1520 100%);">
+  <div class="grid-overlay"></div>
+  <div class="blob1" style="width:380px;height:380px;top:-130px;right:-100px;background:radial-gradient(circle,rgba(0,212,170,0.12) 0%,transparent 70%);"></div>
+  <div class="slide-top-accent"></div>
+  <div class="sr-inner">
+    <div class="sr-section-badge" style="color:#00d4aa">Favorite Places</div>
+    <div class="sr-heading">আমার প্রিয় স্থান</div>
+    <div class="sr-places-layout">
+      ${places.length ? places.map(([p,d,img])=>`
+        <div class="sr-place-card">
+          ${img
+            ? `<img class="sr-place-img" src="${img}" alt="${escH(p)}"/>`
+            : `<div class="sr-place-no-img">${escH(p.substring(0,2).toUpperCase())}</div>`}
+          <div class="sr-place-info">
+            <div class="sr-place-name">${escH(p)}</div>
+            ${d ? `<div class="sr-place-desc">${escH(d)}</div>` : ''}
+          </div>
+        </div>`).join('') : '<div class="sr-body">প্রিয় স্থানের নাম লেখো।</div>'}
+    </div>
+  </div>
+  <div class="sr-page-num">10</div>
+</div>`;
+}
+
+function slide11() {
+  const thanks  = get('s11_thanks')  || 'আমার উপস্থাপনা মনোযোগ দিয়ে দেখার জন্য সবাইকে অসংখ্য ধন্যবাদ।';
+  const closing = get('s11_closing') || 'This is just the beginning! ✨';
+  const name    = get('s11_name')    || get('s1_name') || '';
+  return `
+<div class="slide-render s11" style="background:linear-gradient(135deg,#060810 0%,#0e1225 100%);">
+  <div class="grid-overlay"></div>
+  <div class="blob1" style="width:400px;height:400px;top:-150px;right:-120px;background:radial-gradient(circle,rgba(79,128,255,0.2) 0%,transparent 70%);"></div>
+  <div class="blob2" style="width:350px;height:350px;bottom:-120px;left:-80px;background:radial-gradient(circle,rgba(124,92,252,0.2) 0%,transparent 70%);"></div>
+  <div class="slide-top-accent"></div>
+  <div class="sr-inner">
+    <div class="sr-thankyou">
+      <div class="sr-ty-title">ধন্যবাদ!</div>
+      <div class="sr-ty-divider"></div>
+      <div class="sr-ty-msg">${escH(thanks)}</div>
+      <div class="sr-ty-closing">"${escH(closing)}"</div>
+      ${name ? `<div class="sr-ty-divider"></div><div class="sr-ty-name">— ${escH(name)}</div>` : ''}
+    </div>
+  </div>
+  <div class="sr-page-num">11</div>
+</div>`;
+}
+
+// ─── PREVIEW ────────────────────────────────────────────────────────────────
+function openPreview() {
+  previewSlide = 1;
+  renderPreview(1);
+  buildDots();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closePreview() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function renderPreview(n) {
+  const wrap = document.getElementById('preview-slide-wrap');
+  wrap.innerHTML = '';
+  const slide = renderSlide(n);
+  slide.style.transformOrigin = 'top left';
+  wrap.appendChild(slide);
+  requestAnimationFrame(() => {
+    const wrapW = wrap.offsetWidth;
+    const scale = wrapW / 800;
+    slide.style.transform = `scale(${scale})`;
+    wrap.style.height = (450 * scale) + 'px';
+  });
+  document.getElementById('preview-counter').textContent = `${n} / 11`;
+  document.getElementById('preview-slide-label').textContent = `Slide ${n} / 11`;
+  updateDots(n);
+}
+
+function prevPreviewSlide() {
+  if(previewSlide > 1) { previewSlide--; renderPreview(previewSlide); }
+}
+function nextPreviewSlide() {
+  if(previewSlide < 11) { previewSlide++; renderPreview(previewSlide); }
+}
+function buildDots() {
+  const container = document.getElementById('modal-dots');
+  container.innerHTML = Array.from({length:11},(_,i)=>`
+    <div class="modal-dot ${i===0?'active':''}" onclick="jumpPreview(${i+1})"></div>`).join('');
+}
+function updateDots(n) {
+  document.querySelectorAll('.modal-dot').forEach((d,i) => d.classList.toggle('active', i===n-1));
+}
+function jumpPreview(n) { previewSlide = n; renderPreview(n); }
+
+window.addEventListener('keydown', e => {
+  if(!document.getElementById('modal-overlay').classList.contains('open')) return;
+  if(e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPreviewSlide();
+  if(e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPreviewSlide();
+  if(e.key === 'Escape') closePreview();
+});
+
+// ─── PDF EXPORT (FIXED) ──────────────────────────────────────────────────────
+// Uses a persistent hidden container that stays in the DOM at correct size.
+// html2canvas can properly capture styles because the element is in the real DOM.
+async function downloadPDF() {
+  closePreview();
+  showOverlay(true);
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation:'landscape', unit:'px', format:[800,450] });
+
+  const container = document.getElementById('pdf-render-container');
+  container.style.visibility = 'hidden';
+  container.style.pointerEvents = 'none';
+
+  for(let n = 1; n <= 11; n++) {
+    document.getElementById('gen-progress-text').textContent = `স্লাইড ${n} / 11 রেন্ডার হচ্ছে...`;
+
+    if(n > 1) pdf.addPage([800, 450], 'landscape');
+
+    // Put slide into the fixed-size persistent container
+    container.innerHTML = '';
+    const slide = renderSlide(n);
+    slide.style.position = 'relative';
+    slide.style.transform = 'none';
+    container.appendChild(slide);
+
+    // Wait for layout + any images to paint
+    await new Promise(r => setTimeout(r, 200));
+
+    try {
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#06080f',
+        logging: false,
+        width: 800,
+        height: 450,
+        x: 0,
+        y: 0,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 800,
+        windowHeight: 450,
+        onclone: (clonedDoc) => {
+          // Make the cloned container visible so html2canvas captures it properly
+          const clonedContainer = clonedDoc.getElementById('pdf-render-container');
+          if(clonedContainer) {
+            clonedContainer.style.visibility = 'visible';
+            clonedContainer.style.left = '0';
+            clonedContainer.style.top = '0';
+            clonedContainer.style.position = 'fixed';
+          }
+        }
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      pdf.addImage(imgData, 'JPEG', 0, 0, 800, 450);
+    } catch(e) {
+      console.error('Slide render error', n, e);
+      // Add a fallback blank-ish page so the slide count is preserved
+      pdf.setFillColor(6, 8, 16);
+      pdf.rect(0, 0, 800, 450, 'F');
+    }
+  }
+
+  container.innerHTML = '';
+
+  const studentName = get('s1_name') || 'presentation';
+  pdf.save(`${studentName}_AboutMe.pdf`);
+  showOverlay(false);
+  showToast('✅ PDF সফলভাবে ডাউনলোড হয়েছে!');
+}
+
+function showOverlay(show) {
+  document.getElementById('gen-overlay').classList.toggle('show', show);
+  if(!show) document.getElementById('gen-progress-text').textContent = '';
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+// ─── MOBILE SIDEBAR TOGGLE ───────────────────────────────────────────────────
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  const isOpen = sidebar.classList.toggle('open');
+  backdrop.classList.toggle('open', isOpen);
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-backdrop').classList.remove('open');
+}
+
+window.addEventListener('resize', () => {
+  if(document.getElementById('modal-overlay').classList.contains('open')) {
+    renderPreview(previewSlide);
+  }
+});
+</script>
+</body>
+</html>
